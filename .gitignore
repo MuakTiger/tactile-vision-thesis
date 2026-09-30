@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+.AppleDouble
+
+# 심볼릭 링크로 걸린 코드 저장소 (별도 리모트에서 관리)
+device
+device-dev
+
+# 무관한 프로젝트
+mortality-app/
+mu/
+
+# 임시/출력
+*.tmp
+*.log

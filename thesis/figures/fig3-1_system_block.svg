@@ -1,0 +1,170 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="1010" viewBox="0 0 880 1010" font-family="'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif" role="img" aria-labelledby="t d">
+  <title id="t">시각-촉각 감각 대체 장치 시스템 블록 다이어그램</title>
+  <desc id="d">USB 웹캠에서 Jetson Orin의 Depth Anything V2 추론과 6×4 그리드 축약을 거쳐 Raspberry Pi Pico로 전송되고, PCA9685 2개를 통해 SG90 서보 24개와 랙앤피니언 기구로 촉각 핀을 구동하는 4단 구조를 나타낸 도식.</desc>
+
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#37474f"/>
+    </marker>
+    <style>
+      .lyr   { fill:#fafafa; stroke:#b0bec5; stroke-width:1.4; rx:10 }
+      .lyrlb { font-size:12.5px; font-weight:700; fill:#78909c; letter-spacing:.14em }
+      .box   { stroke-width:1.6; rx:7 }
+      .bt    { font-size:15px; font-weight:700; fill:#1a237e }
+      .bs    { font-size:12.5px; fill:#37474f }
+      .mono  { font-family:'SF Mono',Menlo,Consolas,monospace; font-size:12px; fill:#00695c }
+      .lat   { font-family:'SF Mono',Menlo,Consolas,monospace; font-size:11.5px; fill:#b71c1c }
+      .latlb { font-size:11px; fill:#90a4ae }
+      .ln    { stroke:#37474f; stroke-width:1.8; fill:none; marker-end:url(#ar) }
+      .note  { font-size:11.5px; fill:#546e7a; font-style:italic }
+    </style>
+  </defs>
+
+  <rect width="880" height="1010" fill="#fff"/>
+
+  <!-- 지연시간 열 머리글 -->
+  <text x="700" y="34" class="latlb">측정 구간 (§5.1.1)</text>
+  <line x1="688" y1="42" x2="862" y2="42" stroke="#cfd8dc" stroke-width="1"/>
+
+  <!-- ══ 연산부 ══ -->
+  <rect class="lyr" x="26" y="52" width="636" height="322"/>
+  <text class="lyrlb" x="44" y="76">연산부 · JETSON ORIN DEVELOPER KIT</text>
+
+  <rect class="box" x="60" y="92" width="272" height="56" fill="#e8eaf6" stroke="#5c6bc0"/>
+  <text class="bt" x="76" y="115">USB 웹캠</text>
+  <text class="bs" x="76" y="136">MJPEG · 1280 × 720 · 30 fps</text>
+  <text class="lat" x="700" y="126">L1 = 〔   〕 ms</text>
+
+  <rect class="box" x="60" y="166" width="272" height="48" fill="#fff" stroke="#90a4ae"/>
+  <text class="bs" x="76" y="186">리사이즈 518 × 518</text>
+  <text class="bs" x="76" y="204">ImageNet 정규화</text>
+  <text class="lat" x="700" y="196">L2 = 〔   〕 ms</text>
+
+  <rect class="box" x="60" y="232" width="272" height="60" fill="#e0f2f1" stroke="#00897b"/>
+  <text class="bt" x="76" y="255" fill="#004d40">Depth Anything V2 (ViT-S)</text>
+  <text class="bs" x="76" y="277">TensorRT FP16 · 상대 깊이 출력</text>
+  <text class="lat" x="700" y="268">L3 = 〔   〕 ms</text>
+
+  <rect class="box" x="60" y="310" width="272" height="48" fill="#fff" stroke="#90a4ae"/>
+  <text class="bs" x="76" y="330">Min-Max 정규화 → uint8</text>
+  <text class="bs" x="76" y="348">6 × 4 풀링 → 24개 정수</text>
+  <text class="lat" x="700" y="340">L4 = 〔   〕 ms</text>
+
+  <!-- 6×4 그리드 삽도 -->
+  <text class="latlb" x="378" y="186" fill="#546e7a">6 × 4 = 24 구역</text>
+  <g stroke="#78909c" stroke-width="1.1" fill="#eceff1">
+    <rect x="378" y="196" width="40" height="30"/><rect x="418" y="196" width="40" height="30"/>
+    <rect x="458" y="196" width="40" height="30"/><rect x="498" y="196" width="40" height="30"/>
+    <rect x="538" y="196" width="40" height="30"/><rect x="578" y="196" width="40" height="30"/>
+    <rect x="378" y="226" width="40" height="30"/><rect x="418" y="226" width="40" height="30"/>
+    <rect x="458" y="226" width="40" height="30"/><rect x="498" y="226" width="40" height="30"/>
+    <rect x="538" y="226" width="40" height="30"/><rect x="578" y="226" width="40" height="30"/>
+  </g>
+  <g stroke="#78909c" stroke-width="1.1" fill="#e0e0e0">
+    <rect x="378" y="256" width="40" height="30"/><rect x="418" y="256" width="40" height="30"/>
+    <rect x="458" y="256" width="40" height="30"/><rect x="498" y="256" width="40" height="30"/>
+    <rect x="538" y="256" width="40" height="30"/><rect x="578" y="256" width="40" height="30"/>
+    <rect x="378" y="286" width="40" height="30"/><rect x="418" y="286" width="40" height="30"/>
+    <rect x="458" y="286" width="40" height="30"/><rect x="498" y="286" width="40" height="30"/>
+    <rect x="538" y="286" width="40" height="30"/><rect x="578" y="286" width="40" height="30"/>
+  </g>
+  <g font-family="'SF Mono',Menlo,Consolas,monospace" font-size="11" fill="#37474f" text-anchor="middle">
+    <text x="398" y="215">0</text><text x="438" y="215">1</text><text x="478" y="215">2</text>
+    <text x="518" y="215">3</text><text x="558" y="215">4</text><text x="598" y="215">5</text>
+    <text x="398" y="245">6</text><text x="438" y="245">7</text><text x="478" y="245">8</text>
+    <text x="518" y="245">9</text><text x="558" y="245">10</text><text x="598" y="245">11</text>
+    <text x="398" y="275">12</text><text x="438" y="275">13</text><text x="478" y="275">14</text>
+    <text x="518" y="275">15</text><text x="558" y="275">16</text><text x="598" y="275">17</text>
+    <text x="398" y="305">18</text><text x="438" y="305">19</text><text x="478" y="305">20</text>
+    <text x="518" y="305">21</text><text x="558" y="305">22</text><text x="598" y="305">23</text>
+  </g>
+  <line x1="378" y1="256" x2="618" y2="256" stroke="#ff8f00" stroke-width="2.4"/>
+  <text class="latlb" x="378" y="332" fill="#ef6c00">— 보드 경계 (0x40 / 0x41)</text>
+  <text class="note" x="378" y="352">깊이값 ↑ = 가까움 = 핀 돌출 ↑</text>
+
+  <path class="ln" d="M196,148 L196,164"/>
+  <path class="ln" d="M196,214 L196,230"/>
+  <path class="ln" d="M196,292 L196,308"/>
+  <path d="M332,334 L352,334 L352,256 L372,256" class="ln" stroke-dasharray="4 3"/>
+
+  <!-- ══ 제어부 ══ -->
+  <path class="ln" d="M196,358 L196,398"/>
+  <text class="mono" x="208" y="380">USB CDC  "GRID:v0,…,v23\n"  (최대 101 B)</text>
+  <text class="lat" x="700" y="380">L5 = 〔   〕 ms</text>
+
+  <rect class="lyr" x="26" y="402" width="636" height="126"/>
+  <text class="lyrlb" x="44" y="426">제어부 · RASPBERRY PI PICO (RP2040)</text>
+
+  <rect class="box" x="60" y="440" width="272" height="72" fill="#fff3e0" stroke="#fb8c00"/>
+  <text class="bs" x="76" y="461">패킷 파싱 · 토큰 24개 검증</text>
+  <text class="bs" x="76" y="480">깊이값 → PWM tick 선형 매핑</text>
+  <text class="bs" x="76" y="499">2 s 무수신 → 전체 홈 (failsafe)</text>
+  <text class="lat" x="700" y="476">L6 = 〔   〕 ms</text>
+
+  <text class="mono" x="356" y="461">T(v) = 250 + (v−20)/235 × 240</text>
+  <text class="bs" x="356" y="482">250 tick = 1.221 ms  (홈)</text>
+  <text class="bs" x="356" y="500">490 tick = 2.393 ms  (최대 돌출)</text>
+
+  <!-- ══ 구동부 ══ -->
+  <path class="ln" d="M196,512 L196,552"/>
+  <text class="mono" x="208" y="538">I²C  GP4 (SDA) / GP5 (SCL)</text>
+  <text class="lat" x="700" y="538">L7 = 〔   〕 ms</text>
+
+  <rect class="lyr" x="26" y="556" width="636" height="128"/>
+  <text class="lyrlb" x="44" y="580">구동부 · PWM 드라이버</text>
+
+  <rect class="box" x="60" y="594" width="256" height="72" fill="#f3e5f5" stroke="#8e24aa"/>
+  <text class="bt" x="76" y="617" fill="#4a148c">PCA9685 #1 — 0x40</text>
+  <text class="bs" x="76" y="638">ch 0–11 → 그리드 1–2행</text>
+  <text class="bs" x="76" y="657">PWM 50 Hz · 12 bit (4096 tick)</text>
+
+  <rect class="box" x="332" y="594" width="256" height="72" fill="#f3e5f5" stroke="#8e24aa"/>
+  <text class="bt" x="348" y="617" fill="#4a148c">PCA9685 #2 — 0x41</text>
+  <text class="bs" x="348" y="638">ch 0–11 → 그리드 3–4행</text>
+  <text class="bs" x="348" y="657">PWM 50 Hz · 12 bit (4096 tick)</text>
+
+  <path class="ln" d="M196,552 L196,590"/>
+  <path class="ln" d="M196,570 L460,570 L460,590" stroke-dasharray="0"/>
+
+  <!-- ══ 기구부 ══ -->
+  <path class="ln" d="M324,666 L324,712"/>
+
+  <rect class="lyr" x="26" y="716" width="636" height="182"/>
+  <text class="lyrlb" x="44" y="740">기구부 · 촉각 디스플레이</text>
+
+  <rect class="box" x="60" y="754" width="272" height="62" fill="#e3f2fd" stroke="#1e88e5"/>
+  <text class="bt" x="76" y="777" fill="#0d47a1">SG90 마이크로 서보 × 24</text>
+  <text class="bs" x="76" y="800">회전 범위 Δθ ≈ 111° (산정치)</text>
+
+  <rect class="box" x="60" y="832" width="272" height="48" fill="#e3f2fd" stroke="#1e88e5"/>
+  <text class="bs" x="76" y="852">랙앤피니언 (3D 프린팅)</text>
+  <text class="bs" x="76" y="871">회전 → Z축 직선 돌출</text>
+  <text class="lat" x="700" y="852">L8 = 〔   〕 ms</text>
+
+  <path class="ln" d="M196,816 L196,830"/>
+
+  <!-- 기구 삽도 -->
+  <g transform="translate(378,746)">
+    <rect x="0" y="94" width="230" height="12" fill="#cfd8dc" stroke="#90a4ae"/>
+    <text class="latlb" x="0" y="124" fill="#546e7a">상판 (핀 가이드)</text>
+    <g fill="#42a5f5" stroke="#1565c0" stroke-width="1.2">
+      <rect x="14" y="62" width="13" height="44"/><rect x="48" y="30" width="13" height="76"/>
+      <rect x="82" y="14" width="13" height="92"/><rect x="116" y="42" width="13" height="64"/>
+      <rect x="150" y="74" width="13" height="32"/><rect x="184" y="88" width="13" height="18"/>
+    </g>
+    <line x1="0" y1="8" x2="230" y2="8" stroke="#ef5350" stroke-width="1.2" stroke-dasharray="4 3"/>
+    <text class="latlb" x="0" y="0" fill="#c62828">최대 돌출 (스트로크 = 0.969 · d_p)</text>
+    <text class="note" x="0" y="146">핀 높이 = 해당 구역의 근접도</text>
+  </g>
+
+  <!-- 종단 지연 -->
+  <line x1="688" y1="900" x2="862" y2="900" stroke="#cfd8dc" stroke-width="1"/>
+  <text class="latlb" x="700" y="922">종단 지연</text>
+  <text class="lat" x="700" y="942" font-size="13px">L_total = 〔   〕 ms</text>
+  <text class="latlb" x="700" y="960">목표 R1 ≤ 300 ms</text>
+
+  <!-- 캡션 -->
+  <text x="26" y="938" font-size="13.5px" font-weight="700" fill="#263238">[그림 3-1] 시각-촉각 감각 대체 장치의 시스템 블록 다이어그램</text>
+  <text x="26" y="960" class="note">각 단계의 측정 지연시간(L1–L8)은 실험 I-1 수행 후 기입한다. 회색 점선 화살표는 그리드 인덱스와 PWM 보드의 대응을 나타낸다.</text>
+  <text x="26" y="980" class="note">디스플레이 외형: 173.0 × 200.0 × 62.3 mm (STL 실측). 모듈 피치: 열 28.83 mm × 행 50.00 mm.</text>
+</svg>
