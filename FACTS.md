@@ -11,7 +11,7 @@
 > - 세션 종료 전 갱신한다
 > - §1에 없는 수치를 논문에 결과로 쓰지 않는다
 
-최종 갱신: 2026-10-03
+최종 갱신: 2026-10-04
 
 ---
 
@@ -233,7 +233,20 @@
 | 새 기본 설정 실측 | 실카메라 30 s(Pico 없이): 496프레임 = 16.5 프레임/초, 프레임 중앙 57.6 / p95 79.7 ms, 모델 항상 1개. 전환 시험(hold): 15.3 프레임/초, 두 모델 프레임 0개(애매 83프레임 포함), 전환 2.56~3.05 s | `run.py --duration 30`, `tools/test_switch.py --with-model` |
 | 종단 지연 *(산정치)* | 1단계 변화 평균 약 258 ms(박자 대기 최악 +100 ms), 전체 스트로크 약 615 ms. 박자 200 ms 안에 새 결과 약 3.5개, 서보 약 3.4단계 이동 가능 | `tools/benchmark.py` |
 | 고친 기존 문제 | 캘리브레이션 도구가 키 입력을 기다리는 동안 아무것도 안 보내 failsafe(500 ms)가 핀을 내렸을 것 → KEEPALIVE 추가. `protocol.py` 프레임 크기 주석 30 → 31 | `tools/calibrate_pins.py` |
-| 미검증 | Pico 실기 전부: 박자·진동의 실제 동작, 1도(약 10 µs)가 SG90 데드밴드 안이라 안 움직이는지, 전류, USB 재연결 | — |
+| 미검증 | Pico 실기 전부: 박자·진동의 실제 동작, 1도(약 10 µs)가 SG90 데드밴드 안이라 안 움직이는지, 전류, USB 재연결 → **2026-10-04 실기 업로드·통신은 확인(§1.6(h))**. 서보 동작은 여전히 미검증 | — |
+
+**(h) Pico 실기 연결·펌웨어 v3 업로드 (2026-10-04)** — 근거: 젯슨 `lsusb`·커널 로그·MicroPython REPL·`PicoLink` 출력
+
+| 항목 | 값 | 근거 |
+|---|---|---|
+| 보드 | RP2040 보드, USB-C 커넥터(실크 "Pico ©2020" — 사용자 설명). 부트로더 `UF2 Bootloader v3.0, Model: Raspberry Pi RP2`. MicroPython 파일시스템 1,441,792 B → 2 MB 플래시 배치(정품 Pico와 같음). USB 시리얼 번호 `503558606294741f` | `INFO_UF2.TXT`, `rp2.Flash()` |
+| 이전 펌웨어 | **MicroPython v1.28.0**(USB `2e8a:0005`), `main.py` 1개 — 4번째 줄 SyntaxError로 실행되지 않던 상태. 사용자 결정으로 백업 없이 v3로 교체 | REPL 출력 |
+| 연결 | 젯슨 **USB-A** 포트(허브 1-2.1)에서 인식. 젯슨 본체 USB-C 포트는 장치 모드(`usb_role` = device, `nv-l4t-usb-device-mode` 동작 중)라 Pico를 꽂아도 인식되지 않는다. 처음 꽂을 때 인식 오류(error -32/-110) 몇 번 후 안정 | 커널 로그, sysfs |
+| 권한 | `june`을 dialout 그룹에 추가(다음 로그인부터) + udev 규칙 `/etc/udev/rules.d/60-tactile-pico.rules`(VID 2e8a에 uaccess — 로그인 사용자에게 바로 접근 허용, ModemManager 제외). 펌웨어 교체로 장치가 다시 잡혔을 때도 자동 적용 확인 | `getfacl`, 프로젝트 사본 `tools/60-tactile-pico.rules` |
+| 업로드 | REPL `machine.bootloader()` → RPI-RP2 드라이브(`2e8a:0003`) → `.uf2`(sha256 `7c64df3b105c0073…`) 복사 → `2e8a:000a "Raspberry Pi Pico"`(arduino-pico)로 재부팅 | 커널 로그 |
+| 통신 확인 | `PicoLink`: 펌웨어 v3 판단, `PONG v=3 f=3 crc=0 resync=0 drop=0`, SET_CONFIG 응답 `CFG lv=8 sim=8 tick=200 jit=2,4,6`(보낸 값 그대로). 서보·홈 명령은 보내지 않음 | `PicoLink` 출력 |
+| PCA9685 | 업로드 전 I2C0(GP4 SDA / GP5 SCL) 스캔 결과 **장치 없음** — 이 시점에 서보 드라이버가 연결돼 있지 않았다(그래서 v3 기동 시 홈 이동이 일어날 수 없는 상태에서 올림) | MicroPython `I2C.scan()` |
+| 미검증 | PCA9685 두 보드(0x40/0x41) 연결, 서보 동작(박자·진동·1도), 전류, 캘리브레이션(24채널 미측정) | — |
 
 ---
 
@@ -333,7 +346,7 @@
 | S7 | C920 `exposure_dynamic_framerate` 끄기 검토 — 어두운 곳 fps 저하 방지. FPS 실험(M5·M11) 전에 | 젯슨 `~/tactile-vision` | P2 |
 | S8 | 젯슨 코드를 git 저장소로 만들고 push → 논문 인용 커밋 확보 (D6) | 젯슨 `~/tactile-vision` | P1 |
 | S9 | 무효 깊이값 처리 불일치: 코드는 무효(NaN·0 이하) 셀을 $d_{far}$ 밖으로 처리(`mapping.py` L161) → 핀이 후퇴 필터 속도로 내려감 = "전방 클리어"로 읽힐 수 있음. 논문 v2 S9 L708·§3.3.4 표는 "셀 전체 무효 시 직전 값 유지". 코드를 논문대로(직전 값 유지) 바꿀지 결정 | 젯슨 `~/tactile-vision` / v2 §3.4 | P2 |
-| S10 | **Pico 실기 준비 — 이 파이프라인으로 Pico를 구동한 기록 없음**(`logs/metrics.csv` 2026-09-25 304행 중 전송 0회). ① 사용자 `june`이 `dialout` 그룹이 아님 → `/dev/ttyACM0` 열기 실패 가능성 큼: `sudo usermod -aG dialout june` 후 재로그인 ② Pico에 새 펌웨어 `firmware/pico/tactile_pico.ino` 업로드(예전 ASCII 펌웨어와 호환 안 됨, D9) ③ `calib/servo_calib.json` 24채널 전부 "미측정"(기본 124/448 tick) → `tools/calibrate_pins.py`로 실측. M1~M8 실측의 선행 조건. **(2026-10-03) 컴파일 도구 설치·펌웨어 v3 빌드 완료(§1.6(g)) — 남은 것: ① dialout, ② `.uf2` 업로드(BOOTSEL 드래그 또는 `tools/build_firmware.sh --upload`), ③ 캘리브레이션, ④ 1도 진동 실측** | 젯슨 + Pico | P1 |
+| S10 | **Pico 실기 준비 — 이 파이프라인으로 Pico를 구동한 기록 없음**(`logs/metrics.csv` 2026-09-25 304행 중 전송 0회). ① 사용자 `june`이 `dialout` 그룹이 아님 → `/dev/ttyACM0` 열기 실패 가능성 큼: `sudo usermod -aG dialout june` 후 재로그인 ② Pico에 새 펌웨어 `firmware/pico/tactile_pico.ino` 업로드(예전 ASCII 펌웨어와 호환 안 됨, D9) ③ `calib/servo_calib.json` 24채널 전부 "미측정"(기본 124/448 tick) → `tools/calibrate_pins.py`로 실측. M1~M8 실측의 선행 조건. **(2026-10-03) 컴파일 도구 설치·펌웨어 v3 빌드 완료(§1.6(g)) — 남은 것: ① dialout, ② `.uf2` 업로드(BOOTSEL 드래그 또는 `tools/build_firmware.sh --upload`), ③ 캘리브레이션, ④ 1도 진동 실측** **(2026-10-04) ①② 완료 — §1.6(h). 남은 것: PCA9685 배선 확인, ③ 캘리브레이션, ④ 1도 진동 실측** | 젯슨 + Pico | P1 |
 | S11 | `run.py`가 실행할 때마다 `logs/metrics.csv`를 새로 씀(`pipeline.py` L233 `open("w")`) → 실험 기록 유실 위험. 실험 전 파일명에 시각 넣기 또는 실행 단위 폴더로 변경 | 젯슨 `~/tactile-vision` | P2 |
 
 > §2.2·§2.3·§2.5는 부록 E와 일부 겹친다. 의도된 것이다.
@@ -354,3 +367,4 @@
 | 2026-10-02 | 젯슨(소프트웨어) | 전체 점검: §1.6(e) 신설(테스트·펌웨어 교차검증), D9~D11·C13~C15·S9~S11 추가, D2와 §1.1 피치 행에 주석. 논문 초안은 수정하지 않음 |
 | 2026-10-03 | 젯슨(소프트웨어) | 924×504 깊이 엔진 2개·YOLO26n 엔진 빌드. §1.6(f) 신설(단독·전체 파이프라인 실측, 입력 해상도와 거리 스케일 관찰, 사용자 결정). D2·D8·M11 갱신. 논문 초안은 수정하지 않음 |
 | 2026-10-03 | 젯슨(소프트웨어) | Pico 펌웨어 v3(Pico가 박자 결정·박자 맞춘 진동 1/2/3도), 기본 설정 전환(924×504·YOLO26n·판별 2 Hz·모델 1개), 펌웨어 컴파일 도구 설치. §1.6(g) 신설, D9·S10 갱신. 논문 초안은 수정하지 않음 |
+| 2026-10-04 | 젯슨(소프트웨어) | Pico 실기 연결, 시리얼 권한 설정, MicroPython → 펌웨어 v3 업로드·통신 확인. §1.6(h) 신설, S10 갱신. 논문 초안은 수정하지 않음 |
