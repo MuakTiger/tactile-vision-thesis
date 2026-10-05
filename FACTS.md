@@ -246,6 +246,9 @@
 | 업로드 | REPL `machine.bootloader()` → RPI-RP2 드라이브(`2e8a:0003`) → `.uf2`(sha256 `7c64df3b105c0073…`) 복사 → `2e8a:000a "Raspberry Pi Pico"`(arduino-pico)로 재부팅 | 커널 로그 |
 | 통신 확인 | `PicoLink`: 펌웨어 v3 판단, `PONG v=3 f=3 crc=0 resync=0 drop=0`, SET_CONFIG 응답 `CFG lv=8 sim=8 tick=200 jit=2,4,6`(보낸 값 그대로). 서보·홈 명령은 보내지 않음 | `PicoLink` 출력 |
 | PCA9685 | 업로드 전 I2C0(GP4 SDA / GP5 SCL) 스캔 결과 **장치 없음** — 이 시점에 서보 드라이버가 연결돼 있지 않았다(그래서 v3 기동 시 홈 이동이 일어날 수 없는 상태에서 올림) | MicroPython `I2C.scan()` |
+| 배선 확정 (2026-10-05) | 사용자가 GP3=SDA / GP7=SCL로 배선 → GP3·GP7은 둘 다 SCL 전용이라 I2C 불가 → **SDA를 GP10으로 옮김: GP10=SDA, GP7=SCL(둘 다 I2C1)**. 펌웨어를 `Wire1`(I2C1)로 변경 — 기본 `Wire`(I2C0)에 I2C1 핀을 주면 arduino-pico `setSDA()`가 panic으로 멈춘다. 0x41 보드는 A0 납땜으로 주소 변경, 각 보드 V+에 서보 전원 공급, 각 보드 채널 0에 서보 1개씩 | 사용자 설명, arduino-pico `Wire.cpp` |
+| I2C 응답 (2026-10-05) | 펌웨어가 PING마다 실제로 확인: `I2C sda=GP10 scl=GP7 0x40=ok 0x41=ok` — 두 보드 납땜·배선 정상 | `PicoLink` 출력 |
+| 실물 상하 시험 (2026-10-05) | `tools/servo_updown_test.py`: 24칸 전체 232 ↔ 372 tick(60° ↔ 124.7°, 9.0 mm) 5회 왕복, 1.5 s씩. 프레임 195개 crc 0·resync 0, 실행 중 유실 0(drop 252는 새 연결의 시퀀스 재시작), 박자 82번 적용(약 16 s), 전송 오류 0, 끝난 뒤에도 0x40·0x41 ok. **서보가 실제로 움직였는지는 사용자 확인 대기** | 도구 출력 |
 | 결정 (2026-10-04) | ① 서보 **24개 전부 동시 구동**(`safety.max_simultaneous_moves` 8 → 24, 적용함). ② 각도 범위는 **박자 0.2 s 안에 끝에서 끝까지 이동할 수 있는 크기**로 — 아직 미적용·미측정(Uno 캘리브레이션에서 실제 속도를 재서 정함) | 사용자 |
 | 범위 계산 *(산정치)* | 펌웨어 슬루 4 tick/5 ms = 800 tick/s = 370°/s = 52 mm/s(SG90 데이터시트 0.1 s/60° × 부하 0.6 가정) → 0.2 s에 160 tick = 74.0° = 10.3 mm. 펌웨어 시뮬레이션(24개 동시): 160 tick 끝→끝 195 ms, 140 tick 170 ms, 120 tick 145 ms. 참고: 기본 150°(324 tick)는 끝→끝 400 ms, 동시 구동 8개면 24개 전부 끝→끝 1,210 ms | 펌웨어 코드 PC 시뮬레이션 |
 | 범위와 단계 수 *(산정치)* | 160 tick(10.3 mm)에서 8단계 간격 1.48 mm — 손바닥 높이 구분 한계 가정 2.5 mm 미달(그 한계를 지키는 최대 단계 수: 160 tick 5개, 140·120 tick 4개). 5단계면 160 tick에서 2.58 mm. 2.5 mm는 가정값이며 실험 II-2에서 실측 예정 → 단계 수 결정 필요(**S12**) | `geometry.max_useful_levels` |
