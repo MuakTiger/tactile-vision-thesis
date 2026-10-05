@@ -17,6 +17,7 @@
    - ~/github/tactile-vision-thesis/HANDOFF.md   (인계 문서, 가장 먼저)
    - ~/github/tactile-vision-thesis/FACTS.md     (확정 사실 원장)
    - ~/tactile-vision/README.md                  (장치 코드 설명)
+   - ~/github/tactile-vision-thesis/.kiro/steering/ 안의 파일 (논문 작업 규약)
 2) 읽은 뒤 현재 상태를 7줄 이내로 요약하고, HANDOFF.md 8절의 남은 일 중 무엇부터 할지 나한테 물어봐. 내가 답하기 전에는 파일을 바꾸거나 명령을 실행하지 마.
 3) 규칙은 HANDOFF.md 6절을 따라. 특히: 한국어로 짧고 쉽게 답하기, 토큰 값 출력·저장 금지,
    논문 초안 v1·v2 수정 금지, 핀(서보)을 움직이는 명령은 실행 전에 말해 주기, 공개 저장소 push는 물어보고 하기.
@@ -51,7 +52,10 @@ MuakTiger/tactile-vision 의 README.md 를 읽고 내 졸업 프로젝트를 이
 | 공개 코드 저장소 | https://github.com/MuakTiger/tactile-vision | MIT, main `632b1a1`. 모델 가중치·엔진 제외 |
 | 논문·원장 저장소 | https://github.com/MuakTiger/tactile-vision-thesis (비공개) / 젯슨 `~/github/tactile-vision-thesis/` | `FACTS.md`, `thesis/`, 이 문서 |
 | 논문 v3 | `thesis/졸업논문_v3.md` (+ `.docx`, `.pdf` 39쪽), 그림 `thesis/figures/v3/`, 분석 `thesis/analysis/` | 바탕화면 사본 `~/Desktop/촉각비전_졸업논문_v3/` |
-| 이전 논문 초안 | `thesis/졸업논문_초안.md`(v1), `thesis/졸업논문_초안_v2.md`(v2), `졸업논문.txt` | **수정 금지** |
+| 이전 논문 초안 | `thesis/졸업논문_초안.md`(v1), `thesis/졸업논문_초안_v2.md`(v2) | **수정 금지**. 어느 판을 정본으로 할지는 미정(FACTS D5) |
+| 학과 제출 양식·지침 | `thesis/졸업논문.txt` | 읽기 전용. **v3는 아직 이 양식에 맞춰 보지 않았다** |
+| 논문 작업 규약 | `.kiro/steering/` (이 저장소) | 이전 도구가 따르던 규칙. 새 도구도 읽을 것 |
+| 관련 저장소 | `MuakTiger/tactile-vision-device`(하드웨어·펌웨어 구버전, 커밋 `3f17469`), `MuakTiger/tactile-vision-roadmap`(비공개 로드맵) | 참고용 |
 | 코드 사본 | `~/Desktop/v3/` | `rsync -a --delete --exclude '__pycache__' ~/tactile-vision/ ~/Desktop/v3/` 로 맞춤 |
 | 모델 파일 (로컬만) | `~/tactile-vision/models/` (ONNX·TRT 엔진), `~/tactile-vision/checkpoints/` (.pth, yolo26n.pt, places365/) | 약 840 MB, 저장소에 없음. 받는 곳은 README "모델 파일" |
 | 원본 보행 영상 (로컬만) | `~/Downloads/drive-download-20261005T105756Z-1-001/` (아이폰 MOV 14개, 1.5 GB) | 사람 얼굴 포함 — 공개 금지 |
@@ -191,7 +195,7 @@ docx/pdf 변환: `markdown==3.7`을 임시 폴더에 설치(`pip install --targe
 6. **하드웨어 확인**: 1° 진동이 실제로 움직이는지(SG90 데드밴드), 24개 동시 구동 전류·배선 발열, 서보 실제 속도(Uno 스윕 + 슬로모션).
 7. **확인 화면 켠 상태의 실제 갱신률**: 약 9.4 fps(화면 없이 15.3 fps). 실험 1은 화면 없이 할 것.
 8. **공개 저장소**: 2절의 미커밋 4개 파일을 올릴지 결정.
-9. **논문 마무리**: 제출 연월·인준지 학과 양식, 참고문헌 원문 대조(특히 [4] Manduchi, [20] Weinstein 손바닥 값, [10] Grant), 실물 장치 사진 추가(지금 그림은 도식·그래프·처리 화면뿐).
+9. **논문 마무리**: `thesis/졸업논문.txt`의 학과 양식·지침에 맞춰 v3 점검(표지·목차·분량·참고문헌 형식), 제출 연월·인준지, 참고문헌 원문 대조(특히 [4] Manduchi, [20] Weinstein 손바닥 값, [10] Grant), 실물 장치 사진 추가(지금 그림은 도식·그래프·처리 화면뿐).
 10. **정리**: GitHub 토큰 교체, 예전 hooks 작업이 남긴 `~/.kiro/agents/tactile.json` 정리 여부.
 
 ---
