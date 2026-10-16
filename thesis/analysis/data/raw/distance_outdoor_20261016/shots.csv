@@ -1,0 +1,7 @@
+file,scene,distance_m,shot,time,width,height,autofocus,focus,device
+outdoor_1m_01_180122.png,outdoor,1,1,2026-10-16 18:01:22,1280,720,2,0,1
+outdoor_2m_01_180245.png,outdoor,2,1,2026-10-16 18:02:45,1280,720,2,0,1
+outdoor_3m_01_180326.png,outdoor,3,1,2026-10-16 18:03:26,1280,720,2,0,1
+outdoor_4m_01_180400.png,outdoor,4,1,2026-10-16 18:04:00,1280,720,2,0,1
+outdoor_6m_01_180429.png,outdoor,6,1,2026-10-16 18:04:29,1280,720,2,0,1
+outdoor_8m_01_180455.png,outdoor,8,1,2026-10-16 18:04:55,1280,720,2,0,1
