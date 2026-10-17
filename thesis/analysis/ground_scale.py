@@ -225,9 +225,54 @@ def figures(rows: list[dict], sens: dict, res: dict) -> None:
     plt.close(fig)
 
 
+def fig_thesis(rows: list[dict]) -> None:
+    """원고 [그림 3]: 실제 대 추정(로그 눈금). 실내 사진 = 실내 모델 보정 전·후(다른 장소의 차이로 보정),
+    실외 사진 = 실외 모델 보정 전·땅 기준. 점 = 5장 평균, 막대 = 표준편차, 모양 = 장소."""
+    plt = setup_mpl()
+    ind = [r for r in rows if r["env"] == "indoor"]
+    b = {s: float(np.mean([r["true_m"] - r["metric"] for r in ind if r["site"] == s])) for s in ("site1", "site2")}
+    other = {"site1": "site2", "site2": "site1"}
+    series = {"indoor": (("metric", "실내 모델 (보정 전)", "#2a78d6", "--", "none"),
+                         ("crossb", "실내 모델 - 차이 (장소 교차)", "#2a78d6", "-", None)),
+              "outdoor": (("vkitti", "실외 모델 (보정 전)", "#eb6834", "--", "none"),
+                          ("ground", "땅 기준 환산", "#1b9e77", "-", None))}
+    fig, axes = plt.subplots(1, 2, figsize=(7.4, 3.5))
+    for ax, env in zip(axes, ("indoor", "outdoor")):
+        for k, lab, col, ls, mfc in series[env]:
+            for site, mk in (("site1", "o"), ("site2", "s")):
+                rs = [r for r in rows if r["env"] == env and r["site"] == site]
+                ds = sorted({r["true_m"] for r in rs})
+                v = [[(r["metric"] + b[other[site]]) if k == "crossb" else r[k] for r in rs if r["true_m"] == d]
+                     for d in ds]
+                ax.errorbar(ds, [np.mean(x) for x in v], yerr=[np.std(x, ddof=1) for x in v], color=col, ls=ls,
+                            marker=mk, ms=4.5, lw=1.4, capsize=2, mfc=mfc or col, mec=col,
+                            label=f"{lab} · {PLACE[(env, site)].split(' ', 2)[2]}")
+        xlim, ylim = ((0.4, 5.0), (0.3, 6.0)) if env == "indoor" else ((0.8, 10.0), (0.8, 60.0))
+        ax.plot(ylim, ylim, color="#555555", lw=0.9, ls=":", label="y = x")
+        ax.set_xscale("log")
+        ax.set_yscale("log")
+        ax.set_xlim(*xlim)
+        ax.set_ylim(*ylim)
+        ticks = [0.5, 1, 2, 4] if env == "indoor" else [1, 2, 4, 8]
+        yt = [0.5, 1, 2, 4] if env == "indoor" else [1, 2, 4, 8, 16, 32]
+        ax.set_xticks(ticks)
+        ax.set_xticklabels([f"{t:g}" for t in ticks])
+        ax.set_yticks(yt)
+        ax.set_yticklabels([f"{t:g}" for t in yt])
+        ax.minorticks_off()
+        ax.set_xlabel("줄자 거리 (m)")
+        ax.set_title("(a) 실내 사진" if env == "indoor" else "(b) 실외 사진", fontsize=10)
+        ax.legend(fontsize=6.6, frameon=False, loc="upper left")
+    axes[0].set_ylabel("추정 거리 (m)")
+    fig.tight_layout()
+    fig.savefig(OUT / "fig_thesis_distance.png")
+    plt.close(fig)
+
+
 def main() -> int:
     OUT.mkdir(parents=True, exist_ok=True)
     rows, cache = collect()
+    fig_thesis(rows)
     sens = sensitivity(rows, cache)
     text, res = report(rows, sens)
     with (OUT / "ground_rows.csv").open("w", newline="", encoding="utf-8") as fh:
