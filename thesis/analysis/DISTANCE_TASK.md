@@ -1,6 +1,13 @@
 # 젯슨 작업 지시 — 거리 정확도 분석 (2026-10-17 작성)
 
-노트북 Claude Code 세션에서 썼다. 사진은 `thesis/analysis/data/raw/distance_20261017/`(실외 2곳 × 30장, 실내는 나중에 같은 폴더에 `site1_indoor/`·`site2_indoor/`로 추가). 촬영 조건은 그 폴더의 `NOTES.md`.
+노트북 Claude Code 세션에서 썼다. 사진은 `thesis/analysis/data/raw/distance_20261017/` 아래 4개 폴더, **촬영 끝(120장)**:
+
+| 폴더 | 환경 | 거리(m) × 5장 |
+|---|---|---|
+| `site1_outdoor/`, `site2_outdoor/` | 실외 2곳 | 1 · 2 · 3 · 4 · 6 · 8 |
+| `site1_indoor/`, `site2_indoor/` | 실내 2곳 | 0.5 · 1 · 1.5 · 2 · 3 · 4 |
+
+촬영 조건·장소별 주의점은 그 폴더의 `NOTES.md`. 모든 사진의 거리 표시는 노트북에서 상자 픽셀 폭으로 역산해 확인했다(NOTES).
 
 ## 0. 젯슨 Claude Code에 붙여 넣을 프롬프트
 
@@ -27,27 +34,31 @@
 
 ## 2. 준비 확인
 1. 두 TensorRT 엔진이 있는지: `tools/compare_models.py`가 찾는 경로(없으면 `python tools/build_engine.py --spec wide` 와 `--spec wide --outdoor`. 빌드는 오래 걸리니 먼저 물어보기)
-2. 사진 수: `site1_outdoor/` 30장, `site2_outdoor/` 30장, 각 `shots.csv` 30줄
+2. 사진 수: 4개 폴더 각 30장, 각 `shots.csv` 30줄(합 120)
 3. 화면(DISPLAY) 있는지 — 방법 A와 B의 표시 단계는 창이 필요하다. 1920 폭 화면이면 `compare_models.py --scale 0.9`
 4. 전처리 확인: 장치와 같은 1280×720 → 가운데 1280×698 → 924×504(`compare_models.py`의 `ImageSource`가 `crop_rect` 후 INTER_AREA 축소). 깊이맵 크기도 924×504인지 확인
 
 ## 3. 방법 A — 클릭해서 읽기 (새 코드 없음, 사용자가 직접)
-기존 `tools/compare_models.py`를 장소마다 실행한다.
+기존 `tools/compare_models.py`를 폴더마다 실행한다(4번, 각 30장).
 
 ```bash
 cd ~/tactile-vision
-python tools/compare_models.py --source ~/github/tactile-vision-thesis/thesis/analysis/data/raw/distance_20261017/site1_outdoor --out-dir logs/dist_site1_outdoor
-python tools/compare_models.py --source ~/github/tactile-vision-thesis/thesis/analysis/data/raw/distance_20261017/site2_outdoor --out-dir logs/dist_site2_outdoor
+D=~/github/tactile-vision-thesis/thesis/analysis/data/raw/distance_20261017
+python tools/compare_models.py --source $D/site1_outdoor --out-dir logs/dist_site1_outdoor
+python tools/compare_models.py --source $D/site2_outdoor --out-dir logs/dist_site2_outdoor
+python tools/compare_models.py --source $D/site1_indoor  --out-dir logs/dist_site1_indoor
+python tools/compare_models.py --source $D/site2_indoor  --out-dir logs/dist_site2_indoor
 ```
+- 0.5 m 사진은 상자가 화면 대부분을 덮는다. 상자 앞면 가운데(가장자리 말고)를 클릭.
 
 사진마다: **상자 앞면 가운데를 왼쪽 클릭 → `s` 저장 → `n` 다음 사진**.
 - 클릭 지점 5×5 픽셀 중앙값을 두 모델 값으로 `probes.csv`에 한 줄 쓴다(`source` 열에 파일 이름, `indoor_probe_m`, `outdoor_probe_m`).
 - **주의: 클릭 지점은 다음 사진으로 넘어가도 남는다.** 사진마다 다시 클릭한 뒤 `s`. 표적 없는 사진이면 오른쪽 클릭(해제) 뒤 `n`만.
 - `s`는 PNG 3장과 npz도 같이 저장한다(사진당 몇 MB). 끝나면 `probes.csv`만 논문 저장소로 옮겨도 된다.
-- 끝나면 Claude가 `probes.csv`를 읽어 `source`의 파일 이름에서 거리를 꺼내고(`outdoor_<거리>m_…`, `1p5`=1.5) 1절 통계를 낸다. 한 사진에 여러 줄이면 마지막 줄을 쓴다.
+- 끝나면 Claude가 `probes.csv` 4개를 읽어 `source`의 파일 이름에서 환경·거리를 꺼내고(`<outdoor|indoor>_<거리>m_…`, `0p5`=0.5, `1p5`=1.5) 1절 통계를 낸다. 한 사진에 여러 줄이면 마지막 줄을 쓴다. 장소는 `--out-dir` 폴더 이름으로 구분.
 
 ## 4. 방법 B — ROI(상자 영역) 자동 계산
-1. 영역 표시(사용자, 화면 필요, 60장 약 5~10분):
+1. 영역 표시(사용자, 화면 필요, 120장 약 10~20분. 4개 폴더를 한 번에 차례로 띄움):
    ```bash
    cd ~/github/tactile-vision-thesis
    python thesis/analysis/annotate_roi.py thesis/analysis/data/raw/distance_20261017
@@ -66,5 +77,4 @@ python tools/compare_models.py --source ~/github/tactile-vision-thesis/thesis/an
 ## 5. 끝나면
 - 결과를 7줄 이내로: 모델별 보정 전 MAPE, k, 보정 후 MAPE(LODO·장소 교차), 눈에 띄는 거리
 - HANDOFF 맨 위에 결과 한 절, FACTS 에 확정 수치(출처 파일·커밋)
-- 실내 사진이 올라오면 같은 절차를 `site*_indoor/`에 반복
 - 커밋·push 는 사용자에게 묻고
