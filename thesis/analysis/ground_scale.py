@@ -26,7 +26,8 @@ from distance_analysis import OUT_CSV, OUT_DIR, inner_slice, load_rois, load_sho
 from relative_depth import B_INDOOR, CACHE, CY_RAW, F_RAW, GROUND_MAX_M, H_CAM, NEAR
 
 OUT = OUT_DIR / "ground"
-FAR = 8.0                 # 핀 단계 비교용 d_far
+# 핀 단계 비교용 d_far — 장치 ground-scale 가지 설정(2026-10-17 사용자 결정: 실내 8 m, 실외 20 m)
+FAR = {"indoor": 8.0, "outdoor": 20.0}
 SITE_KO = {"site1": "장소 1", "site2": "장소 2"}
 PLACE = {("outdoor", "site1"): "실외 1 산책로", ("outdoor", "site2"): "실외 2 주차장",
          ("indoor", "site1"): "실내 1 거실", ("indoor", "site2"): "실내 2 주방"}
@@ -36,7 +37,7 @@ COLOR = {"ground": "#1b9e77", "metric_b": "#2a78d6"}
 N_BOOT = 10000
 
 
-def level(d: float, far: float = FAR) -> int:
+def level(d: float, far: float) -> int:
     if not math.isfinite(d) or d >= far:
         return 0
     if d <= NEAR:
@@ -89,7 +90,7 @@ def ape(r: dict, k: str) -> float:
 
 def block(rs: list[dict], k: str) -> dict:
     a = np.array([ape(r, k) for r in rs])
-    lv = np.array([level(r[k]) - level(r["true_m"]) for r in rs])
+    lv = np.array([level(r[k], FAR[r["env"]]) - level(r["true_m"], FAR[r["env"]]) for r in rs])
     return {"n": len(rs), "mape": float(a.mean()), "median_ape": float(np.median(a)),
             "step_exact": float(np.mean(lv == 0) * 100), "step_pm1": float(np.mean(np.abs(lv) <= 1) * 100)}
 
@@ -136,7 +137,8 @@ def per_distance(rs: list[dict], k: str) -> list[tuple]:
     out = []
     for d in sorted({r["true_m"] for r in rs}):
         v = np.array([r[k] for r in rs if r["true_m"] == d])
-        out.append((d, float(v.mean()), float(v.std(ddof=1)), level(d), level(float(v.mean()))))
+        far = FAR[rs[0]["env"]]
+        out.append((d, float(v.mean()), float(v.std(ddof=1)), level(d, far), level(float(v.mean()), far)))
     return out
 
 
@@ -145,7 +147,7 @@ def report(rows: list[dict], sens: dict) -> tuple[str, dict]:
            "cy_px": CY_RAW, "tilt_deg": 0, "ground_band_m": [1.82, GROUND_MAX_M], "d_far_for_steps": FAR}}
     L = ["# 땅 기준 거리 환산 검증 (자동 생성: `ground_scale.py`)", "",
          f"가정: 렌즈 높이 {H_CAM} m, 수평, 초점거리 {F_RAW:g} px(1280×720), 땅 줄 1.82~{GROUND_MAX_M} m. "
-         "상자 거리로 맞춘 값 없음. 핀 단계는 d_far 8 m, 필터 없이.", ""]
+         "상자 거리로 맞춘 값 없음. 핀 단계는 d_far 실내 사진 8 m · 실외 사진 20 m(장치 ground-scale 가지), 필터 없이.", ""]
     for env in ("outdoor", "indoor"):
         L.append(f"## {'실외' if env == 'outdoor' else '실내'} 사진")
         for site in ("site1", "site2", None):

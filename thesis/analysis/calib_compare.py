@@ -23,7 +23,7 @@ from relative_depth import CACHE, CY_RAW, F_RAW, GROUND_MAX_M, H_CAM
 
 rows = [r for r in csv.DictReader(open(OUT_CSV, encoding="utf-8")) if r["method"] == "roi"]
 K_TH = (0.70 * 908 / 698) / (1.65 * 725 / 375)
-FAR = {"indoor": 4.0, "outdoor": 8.0}
+FAR = {"indoor": 8.0, "outdoor": 20.0}  # 장치 ground-scale 가지 d_far (2026-10-17 사용자 결정, 이전 4 / 8 m)
 
 
 def level(d, far):  # 장치 log 매핑(near 0.5, 8단계), 필터 없이
