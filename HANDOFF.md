@@ -5,7 +5,20 @@
 
 ---
 
-## 추가 — 2026-10-17(토) 노트북 세션: 거리 정확도 촬영 (이 절 먼저)
+## 추가 — 2026-10-17(토) 젯슨 세션: 거리 정확도 분석 끝 (이 절 먼저)
+
+젯슨의 Claude Code 세션에서 정리했다. 수치 근거는 FACTS §1.8.
+- **방법 B(ROI)로 120장 분석 완료.** 사용자가 `annotate_roi.py`로 120장 모두 상자 영역을 표시했다(`data/raw/distance_20261017/rois.csv`). 기울어진 상자는 안쪽만 잡았고, 분석은 그 영역을 사방 20% 더 줄인 안쪽 중앙값을 쓴다. ROI 확인 이미지 `thesis/analysis/out_distance/roi_check_{outdoor,indoor}.jpg`는 사용자가 확인했다.
+- **방법 A(클릭)는 하지 않는다**(사용자 결정: B 결과로 충분). 그래서 A·B 대조(10% 넘는 사진 확인)도 없다.
+- 새 분석 스크립트 `thesis/analysis/distance_analysis.py`: 장치 코드의 `crop_rect`·`DepthEngine`과 `compare_models.py`의 엔진 경로를 그대로 쓴다. `--no-infer`는 GPU 없이 표·그림만 다시 만든다. 출력 `data/exp_distance.csv`(example = 0), `out_distance/`(summary.md·json, k_table.csv, per_distance.csv, `fig_est_vs_true_roi.png`, `fig_error_pct_roi.png`).
+- **결과(주 비교)**:
+  - 실내 사진 × 실내 모델: 보정 전 MAPE 34%, k 0.84 / 0.86(장소 1 / 2), 보정 후 LODO 18% / 21%, 장소 교차 18% / 18%.
+  - 실외 사진 × 실외 모델: 보정 전 MAPE 518%(1 m를 평균 8.8 m로 봄), k 0.26 / 0.16, 보정 후 LODO 64% / 33%, 장소 교차 78% / 48%.
+- 관찰: 실내 모델은 거리와 거의 무관하게 0.4~0.5 m 멀게 본다(0.5 m에서 +87%, 4 m에서 +11%). 보조 조합 '실외 사진 × 실내 모델'은 장소 1에서 보정 전 17%로 실외 모델보다 가깝다.
+- **사용자 답 대기**: 원점을 지나지 않는 1차식(참 ≈ a × 추정 + b) 보정을 보조로 더할지. 지시서(DISTANCE_TASK.md)에는 없는 분석이다.
+- 장치 설정(config·calib)은 바꾸지 않았다. 남은 일: 원고 Ⅲ 결과의 거리 정확도 절, 다른 실험 일정.
+
+## 추가 — 2026-10-17(토) 노트북 세션: 거리 정확도 촬영
 
 노트북(Windows) Claude Code 세션에서 정리했다.
 - **거리 정확도 촬영 완료(120장)**: 장치의 C920을 노트북에 연결해 실외 2곳 × 1·2·3·4·6·8 m, 실내 2곳 × 0.5·1·1.5·2·3·4 m, 거리마다 5장. `thesis/analysis/data/raw/distance_20261017/{site1,site2}_{outdoor,indoor}/`(조건은 `NOTES.md`). 표적은 50×70 cm 판 대신 흰 상자 앞면 30×27 cm. 장소를 2곳씩 찍은 건 보정 배율의 **장소 교차 검증**용(사용자 결정).
