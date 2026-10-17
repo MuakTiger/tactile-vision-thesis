@@ -13,3 +13,6 @@ mu/
 # 임시/출력
 *.tmp
 *.log
+
+# 거리 뷰어 깊이맵 캐시 (depth_viewer.py --build 로 다시 만든다, 약 0.5 GB)
+thesis/analysis/data/depth_cache/

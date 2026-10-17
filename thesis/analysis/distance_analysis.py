@@ -150,45 +150,59 @@ def cell_of(px: float, py: float, spec, cols: int, rows: int) -> int:
     return r * cols + c
 
 
+class Device:
+    """장치 코드로 두 모델을 만든다(compare_models.py와 같은 방식). GPU를 쓴다."""
+
+    def __init__(self) -> None:
+        sys.path.insert(0, str(DEVICE_REPO / "src"))
+        sys.path.insert(0, str(DEVICE_REPO / "tools"))
+        from tactile_vision import geometry as geo
+        from tactile_vision.camera import crop_rect
+        from tactile_vision.config import load
+        from tactile_vision.depth import DepthEngine
+        from compare_models import INDOOR, OUTDOOR, engine_path_for, probe_value
+
+        cfg = load(None)  # ~/tactile-vision/config/default.yaml (읽기만)
+        self.spec = spec = cfg.depth.spec
+        self.size = (spec.width, spec.height)
+        self.geo, self.crop_rect, self.probe_value = geo, crop_rect, probe_value
+        self.engines = {}
+        for ms in (INDOOR, OUTDOOR):
+            p = engine_path_for(ms, None, cfg, spec)
+            dcfg = dataclasses.replace(cfg.depth, engine=str(p), max_depth_m=ms.max_depth_m)
+            self.engines[ms.key] = DepthEngine(dcfg, cfg.grid, p)
+            self.engines[ms.key].warmup(5)
+        self.prep = {"input_spec": spec.name, "model_input": list(self.size),
+                     "engines": {k: Path(e.dcfg.engine).name for k, e in self.engines.items()},
+                     "max_depth_m": {k: e.dcfg.max_depth_m for k, e in self.engines.items()},
+                     "grid": f"{geo.GRID_COLS}x{geo.GRID_ROWS}", "cell_px": [spec.cell_w, spec.cell_h],
+                     "cell_reducer": f"{cfg.grid.reducer} {cfg.grid.percentile:g}",
+                     "cell_margin": cfg.grid.cell_margin}
+
+    def infer(self, path: Path):
+        """원본 사진 → (crop, 모델 입력 BGR, {모델: 깊이맵}, {모델: 셀 24개})"""
+        raw = cv2.imread(str(path), cv2.IMREAD_COLOR)
+        crop = self.crop_rect(raw.shape[1], raw.shape[0], self.size[0] / self.size[1])
+        self.prep.setdefault("crop_rect", list(crop))
+        x, y, w, h = crop
+        img = cv2.resize(raw[y:y + h, x:x + w], self.size, interpolation=cv2.INTER_AREA)
+        depth, cells = {}, {}
+        for k, e in self.engines.items():
+            cells[k] = e.infer(img)
+            depth[k] = e.last_depth_map()
+            assert depth[k].shape == (self.size[1], self.size[0]), depth[k].shape
+        return crop, img, depth, cells
+
+
 def run_inference(shots, rois, probes) -> tuple[list[dict], list[dict], dict]:
-    sys.path.insert(0, str(DEVICE_REPO / "src"))
-    sys.path.insert(0, str(DEVICE_REPO / "tools"))
-    from tactile_vision import geometry as geo
-    from tactile_vision.camera import crop_rect
-    from tactile_vision.config import load
-    from tactile_vision.depth import DepthEngine
-    from compare_models import INDOOR, OUTDOOR, engine_path_for, probe_value
-
-    cfg = load(None)  # ~/tactile-vision/config/default.yaml (읽기만)
-    spec = cfg.depth.spec
-    size = (spec.width, spec.height)
-    engines = {}
-    for ms in (INDOOR, OUTDOOR):
-        p = engine_path_for(ms, None, cfg, spec)
-        dcfg = dataclasses.replace(cfg.depth, engine=str(p), max_depth_m=ms.max_depth_m)
-        engines[ms.key] = DepthEngine(dcfg, cfg.grid, p)
-        engines[ms.key].warmup(5)
-    prep = {"input_spec": spec.name, "model_input": list(size),
-            "engines": {k: Path(e.dcfg.engine).name for k, e in engines.items()},
-            "max_depth_m": {k: e.dcfg.max_depth_m for k, e in engines.items()},
-            "grid": f"{geo.GRID_COLS}x{geo.GRID_ROWS}", "cell_px": [spec.cell_w, spec.cell_h],
-            "cell_reducer": f"{cfg.grid.reducer} {cfg.grid.percentile:g}", "cell_margin": cfg.grid.cell_margin}
-
+    dev = Device()
+    geo, spec, size, probe_value = dev.geo, dev.spec, dev.size, dev.probe_value
     rows, checks = [], []
     for s in shots:
         key = (s["folder"], s["file"])
         if key not in rois and key not in probes:
             continue
-        raw = cv2.imread(str(RAW / s["folder"] / s["file"]), cv2.IMREAD_COLOR)
-        crop = crop_rect(raw.shape[1], raw.shape[0], size[0] / size[1])
-        prep.setdefault("crop_rect", list(crop))
-        x, y, w, h = crop
-        img = cv2.resize(raw[y:y + h, x:x + w], size, interpolation=cv2.INTER_AREA)
-        depth, cells = {}, {}
-        for k, e in engines.items():
-            cells[k] = e.infer(img)
-            depth[k] = e.last_depth_map()
-            assert depth[k].shape == (size[1], size[0]), depth[k].shape
+        crop, _, depth, cells = dev.infer(RAW / s["folder"] / s["file"])
         base = {"example": 0, "env": s["env"], "site": s["site"], "file": s["file"],
                 "shot": s["shot"], "true_m": s["true_m"]}
 
@@ -209,7 +223,7 @@ def run_inference(shots, rois, probes) -> tuple[list[dict], list[dict], dict]:
                                "probes_csv": pr[k], "recomputed": round(again, 3)})
                 rows.append({**base, "method": "click", "model": k, "est_m": pr[k],
                              "cell_p10_m": round(float(cells[k][ci]), 4)})
-    return rows, checks, prep
+    return rows, checks, dev.prep
 
 
 def write_rows(rows: list[dict]) -> None:
