@@ -1,0 +1,130 @@
+{
+ "timing": {
+  "src": [
+   "out_level/summary.json",
+   "out_latency/trials.csv (ok == 1)"
+  ],
+  "age_plus_total": "34.8 + 68.8 = 103.6 (프레임별 합의 평균 103.6)",
+  "onset_plus_move": "116.3 + 163.8 = 280.1 (도착 평균 280.1)",
+  "proc_plus_drive": "103.6 + 280.1 = 383.7",
+  "start_total": "103.6 + 116.3 = 219.9",
+  "share_proc_pct": 27.0,
+  "share_drive_pct": 73.0,
+  "onset_range_width_ms": 174.1,
+  "onset_minus_beat_ms": 16.3,
+  "slew_full_stroke_ms": 175.0,
+  "slew_5to95_ms": 157.5,
+  "walk_m_arrive_mean": 0.46,
+  "walk_m_arrive_max_p95": 0.62,
+  "fps_display_on": 9.4,
+  "scene_p95_ms": 22.4,
+  "n_trials": 17,
+  "n_up": 8,
+  "n_down": 9
+ },
+ "mapping": {
+  "src": "식만 사용 (level_budget.py와 같은 매핑)",
+  "first_level_m": {
+   "indoor": 6.56,
+   "outdoor": 15.37
+  },
+  "ratio_per_level": {
+   "indoor": 1.486,
+   "outdoor": 1.694
+  },
+  "stroke_mm": 9.04,
+  "mm_per_level": 1.292,
+  "step_5tick_mm": 0.323,
+  "step_5tick_level": 0.25,
+  "pinion_tooth_mm": 4.19,
+  "pinion_tooth_tick": 64.8,
+  "floor_1p82_vs_1p4_level": 0.66,
+  "floor_levels_rounded": [
+   4,
+   4
+  ]
+ },
+ "geometry": {
+  "src": "가정값 h 0.70 m, f 908 px, 가운데 1280×698 (ground_scale.py·relative_depth.py와 같음)",
+  "bottom_row_ground_m": 1.82,
+  "half_vfov_deg": 21.0,
+  "visible_height_at_1m_m": 0.316,
+  "theory_ratio_vkitti": 3.5
+ },
+ "distance": {
+  "src": "out_distance/ground/ground_rows.csv",
+  "b_site_m": {
+   "site1": -0.47,
+   "site2": -0.41
+  },
+  "indoor_metric_offset_by_distance_m": {
+   "0.5": 0.44,
+   "1.0": 0.37,
+   "1.5": 0.51,
+   "2.0": 0.43,
+   "3.0": 0.46,
+   "4.0": 0.43
+  },
+  "indoor_metric_offset_range_m": [
+   0.37,
+   0.51
+  ],
+  "xk_cross_indoor": {
+   "mape": 18.02,
+   "level_match": 70.0,
+   "level_within1": 98.33,
+   "dlevel_mean": 0.39
+  },
+  "xk_cross_outdoor": {
+   "mape": 63.16,
+   "level_match": 25.0,
+   "level_within1": 80.0,
+   "dlevel_mean": 1.02
+  },
+  "check_against": "out_distance/calib_compare.md: 실내 × k 18.0 / 70 / 98, 실외 × k 63.2 / 25 / 80"
+ },
+ "sensitivity": {
+  "src": "out_distance/ground/summary.json sensitivity",
+  "base_mape": 21.1,
+  "tilt_minus1_delta_pp": [
+   -4.3,
+   -4.3
+  ],
+  "tilt_plus1_delta_pp": [
+   5.2,
+   5.3
+  ],
+  "height_0p65_delta_pp": [
+   -5.0,
+   -5.0
+  ],
+  "height_0p75_delta_pp": [
+   6.2,
+   6.3
+  ]
+ },
+ "pin_zero": {
+  "src": "out_pin_zero/cells.csv",
+  "n_zero": 5,
+  "n_pos": 8,
+  "n_neg": 11,
+  "n_le1": 13,
+  "n_gt1": 11,
+  "n_gt2": 7,
+  "abs_mean_level": 1.25,
+  "max_level": 4.0,
+  "col4_mm": [
+   -1.94,
+   -3.55,
+   -2.58,
+   -1.61
+  ]
+ },
+ "gait_ref": {
+  "src": "Bohannon 1997 초록 127.2~146.2 cm/s",
+  "m_per_s": [
+   1.27,
+   1.46
+  ]
+ }
+}
