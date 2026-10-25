@@ -236,7 +236,7 @@ MAPE(평균 절대 백분율 오차)는 평균(|추정 − 실제| / 실제) × 
 [17] S. Song and M. Chandraker, "Robust scale estimation in real-time monocular SFM for autonomous driving," in *Proc. IEEE Conf. Comput. Vis. Pattern Recognit. (CVPR)*, 2014, pp. 1566–1573. https://doi.org/10.1109/CVPR.2014.203
 [18] D. Zhou, Y. Dai, and H. Li, "Ground-plane-based absolute scale estimation for monocular visual odometry," *IEEE Trans. Intell. Transp. Syst.*, vol. 21, no. 2, pp. 791–802, 2020. https://doi.org/10.1109/TITS.2019.2900330
 [19] *Medical Devices — Quality Management Systems — Requirements for Regulatory Purposes*, ISO 13485:2016, International Organization for Standardization, Geneva, Switzerland, 2016. [Online]. Available: https://www.iso.org/standard/59752.html
-[20] 오형준, "tactile-vision: 시각-촉각 감각 대체 장치 코드," GitHub 저장소, ground-scale 가지, 커밋 〔커밋 해시〕, 2026. [Online]. Available: https://github.com/MuakTiger/tactile-vision
+[20] 오형준, "tactile-vision: 시각-촉각 감각 대체 장치 코드," GitHub 저장소, ground-scale 가지, 커밋 439d1cb, 2026. [Online]. Available: https://github.com/MuakTiger/tactile-vision
 [21] B. Zhou, A. Lapedriza, A. Khosla, A. Oliva, and A. Torralba, "Places: A 10 million image database for scene recognition," *IEEE Trans. Pattern Anal. Mach. Intell.*, vol. 40, no. 6, pp. 1452–1464, 2018. https://doi.org/10.1109/TPAMI.2017.2723009
 [22] K. He, X. Zhang, S. Ren, and J. Sun, "Deep residual learning for image recognition," in *Proc. IEEE Conf. Comput. Vis. Pattern Recognit. (CVPR)*, 2016, pp. 770–778. https://doi.org/10.1109/CVPR.2016.90
 [23] M. Roberts et al., "Hypersim: A photorealistic synthetic dataset for holistic indoor scene understanding," in *Proc. IEEE/CVF Int. Conf. Comput. Vis. (ICCV)*, 2021, pp. 10892–10902. https://doi.org/10.1109/ICCV48922.2021.01073
