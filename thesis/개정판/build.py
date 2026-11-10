@@ -5,7 +5,10 @@
 바꾼 뒤 그 스크립트의 build()를 그대로 부른다. build_docx_D.py 는 고치지 않는다.
 
 사용:  python3 build.py            # 같은 폴더에 졸업논문_개정판.docx 를 만든다
-       soffice --headless --convert-to pdf 졸업논문_개정판.docx   # 미리보기 PDF
+
+제출용 PDF는 Word에서 docx를 열어 내보낸다(양식 글꼴 '맑은 고딕'이 있는 환경).
+졸업논문_개정판_미리보기.pdf 는 LibreOffice로 바꾼 확인용이라 글꼴과 쪽 나눔이 Word와 다르다.
+       soffice --headless --convert-to pdf 졸업논문_개정판.docx
 
 필요: Pillow (JPG 사진의 크기를 읽고 줄일 때 쓴다)
 """
